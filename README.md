@@ -1,71 +1,70 @@
-﻿# Arch Terminal Blog
+# Blog Desktop (Linux Mint themed CMS)
 
-A modern full-stack blog platform built with **Next.js App Router**, **TailwindCSS**, **Supabase**, **Tiptap**, **Framer Motion**, and **Shiki**.
+A personal blog at `blog.yourdomain.com` with:
 
-## Features
-
-- Responsive public blog with featured posts and archive listing
-- Search, tag filtering, and category-friendly archive views
-- Dynamic post pages at `/post/[slug]`
-- Syntax highlighted code blocks and embedded video support
-- Admin dashboard at `/admin` with secure Supabase login
-- Post creation, editing, drafts, archiving, private/unlisted support
-- Media upload support for Supabase storage
-- Terminal-inspired dark UI with glassmorphism and animated hover states
-- Vercel-ready configuration and Supabase-compatible deployment
+- **Public site**: Linux Mint–style desktop (Notes, Files, Terminal, Settings)
+- **Admin CMS** at `/admin` (single user, credentials from `.env`)
+- **Posts** at `/{slug}` (e.g. `/af3rjiw93`)
+- **Stack**: Next.js 16, Supabase (DB + Storage), Vercel
 
 ## Setup
 
-1. Copy environment variables:
+### 1. Supabase
+
+1. Create a project at [supabase.com](https://supabase.com).
+2. Run SQL from [`supabase/schema.sql`](supabase/schema.sql) in the SQL Editor.
+3. Create a **public** storage bucket named `blog-media`.
+4. Copy **Project URL**, **anon key**, and **service role key**.
+
+### 2. Environment
+
+Copy `.env.example` to `.env.local` and fill in:
 
 ```bash
 cp .env.example .env.local
 ```
 
-2. Update `.env.local` with your Supabase values:
+| Variable | Purpose |
+|----------|---------|
+| `ADMIN_USERNAME` / `ADMIN_PASSWORD` | CMS login (only you) |
+| `AUTH_SECRET` | Session signing (`openssl rand -base64 32`) |
+| `NEXT_PUBLIC_SUPABASE_*` | Client + public reads |
+| `SUPABASE_SERVICE_ROLE_KEY` | Server uploads & admin API |
+| `NEXT_PUBLIC_SITE_URL` | Canonical URL (e.g. `https://blog.example.com`) |
 
-- `NEXT_PUBLIC_SUPABASE_URL`
-- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-- `SUPABASE_SERVICE_ROLE_KEY`
-- `NEXT_PUBLIC_ADMIN_EMAIL`
-
-3. Create your Supabase tables using `supabase_schema.sql`.
-
-4. Run the development server:
+### 3. Local dev
 
 ```bash
+npm install
 npm run dev
 ```
 
-5. Open [http://localhost:3000](http://localhost:3000).
+- Desktop: http://localhost:3000  
+- Admin: http://localhost:3000/admin  
 
-## Supabase Schema
+### 4. Vercel + custom domain
 
-The database schema is defined in `supabase_schema.sql` and includes:
+1. Push repo to GitHub and import in Vercel.
+2. Add the same env vars in **Project → Settings → Environment Variables**.
+3. Add domain `blog.example.com` in Vercel → Domains.
+4. Point DNS (CNAME) to Vercel as instructed.
 
-- `posts`
-- `tags`
-- `media`
-- `post_tags`
-- `admin_users`
+## Post statuses
 
-## Deployment
+| Status | Behavior |
+|--------|----------|
+| `published` | Visible on desktop & direct URL |
+| `draft` | Admin only |
+| `archived` | Hidden from public |
+| `private` | Hidden from public |
+| `unlinked` | Not listed in Notes; URL may still work if published before — set to draft/private to fully hide |
 
-This application is compatible with Vercel free tier. Set your environment variables in Vercel, then deploy the repository.
+## Media privacy
 
-### Recommended Vercel env vars
+- Uploads are **compressed on the server** (images → WebP via Sharp).
+- Storage keys are **random hashes**; original filenames are never stored.
+- Only optimized public URLs are saved in the database.
 
-- `NEXT_PUBLIC_SUPABASE_URL`
-- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-- `SUPABASE_SERVICE_ROLE_KEY`
-- `NEXT_PUBLIC_ADMIN_EMAIL`
+## Admin editor
 
-## Notes
-
-- This project does not install dependencies automatically. Use your preferred package manager locally.
-- The admin panel uses Supabase authentication and protects `/admin` routes with middleware.
-- Use the `/admin` dashboard to manage posts, tags, and media.
-
-## License
-
-MIT
+TipTap-based editor supports bold/italic, headings, lists, code blocks, links, images, videos, YouTube embeds, and image compare markers (`[compare:before|after]` rendered as a slider on the desktop).
