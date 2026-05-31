@@ -18,13 +18,16 @@ export async function POST(request: Request) {
   try {
     await requireAdmin();
     const form = await request.formData();
-    const file = form.get("file");
-    if (!(file instanceof File)) {
+    const rawFile = form.get("file");
+    if (!rawFile || typeof (rawFile as any).arrayBuffer !== "function") {
       return NextResponse.json({ error: "No file provided" }, { status: 400 });
     }
 
+    const file = rawFile as File | Blob;
+    const fileType = typeof (file as any).type === "string" ? file.type : "";
+    const fileName = typeof (file as any).name === "string" ? (file as any).name : "";
     const buffer = Buffer.from(await file.arrayBuffer());
-    const isVideo = file.type.startsWith("video/") || file.name.endsWith(".mp4");
+    const isVideo = fileType.startsWith("video/") || fileName.endsWith(".mp4");
 
     if (isVideo) {
       if (buffer.length > MAX_VIDEO) {
@@ -64,7 +67,7 @@ export async function POST(request: Request) {
       });
     }
 
-    if (!file.type.startsWith("image/") && !file.type.startsWith("application/")) {
+    if (!fileType.startsWith("image/") && !fileType.startsWith("application/")) {
       return NextResponse.json({ error: "Unsupported file type" }, {
         status: 400,
       });

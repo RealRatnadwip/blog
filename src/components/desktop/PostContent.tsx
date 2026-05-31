@@ -54,19 +54,28 @@ function renderText(node: TipTapNode): React.ReactNode {
   return el;
 }
 
+function getStyles(node: TipTapNode): React.CSSProperties {
+  const styles: React.CSSProperties = {};
+  if (node.attrs?.textAlign) {
+    styles.textAlign = node.attrs.textAlign as any;
+  }
+  return styles;
+}
+
 function renderNode(node: TipTapNode, key: number): React.ReactNode {
   const kids = node.content?.map((c, i) => renderNode(c, i));
   switch (node.type) {
     case "doc":
       return <article key={key}>{kids}</article>;
     case "paragraph":
-      return <p key={key}>{kids}</p>;
+      return <p key={key} style={getStyles(node)}>{kids}</p>;
     case "heading": {
       const level = Number(node.attrs?.level ?? 1);
-      if (level === 1) return <h1 key={key}>{kids}</h1>;
-      if (level === 2) return <h2 key={key}>{kids}</h2>;
-      if (level === 3) return <h3 key={key}>{kids}</h3>;
-      return <h4 key={key}>{kids}</h4>;
+      const style = getStyles(node);
+      if (level === 1) return <h1 key={key} style={style}>{kids}</h1>;
+      if (level === 2) return <h2 key={key} style={style}>{kids}</h2>;
+      if (level === 3) return <h3 key={key} style={style}>{kids}</h3>;
+      return <h4 key={key} style={style}>{kids}</h4>;
     }
     case "bulletList":
       return <ul key={key}>{kids}</ul>;
@@ -84,12 +93,30 @@ function renderNode(node: TipTapNode, key: number): React.ReactNode {
       );
     case "horizontalRule":
       return <hr key={key} />;
-    case "image":
+    case "image": {
+      const width = String(node.attrs?.width ?? "100%");
+      const isPercent = width.endsWith("%");
+      const displayWidth = isPercent ? `calc(${width} - 8px)` : width;
       return (
-        <figure key={key} className="post-figure">
-          <img src={String(node.attrs?.src ?? "")} alt="" loading="lazy" />
+        <figure
+          key={key}
+          className="post-figure"
+          style={{
+            display: "inline-block",
+            width: displayWidth,
+            margin: "4px",
+            verticalAlign: "top",
+          }}
+        >
+          <img
+            src={String(node.attrs?.src ?? "")}
+            alt=""
+            loading="lazy"
+            style={{ width: "100%", borderRadius: "4px" }}
+          />
         </figure>
       );
+    }
     case "videoBlock":
       return (
         <figure key={key} className="post-figure">

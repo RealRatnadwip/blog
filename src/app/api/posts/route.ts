@@ -17,17 +17,46 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     await requireAdmin();
-    const body = await request.json();
-    const title = String(body.title ?? "").trim();
-    if (!title) {
-      return NextResponse.json({ error: "Title required" }, { status: 400 });
-    }
-    const status = (body.status ?? "draft") as PostStatus;
-    const slug = body.slug?.trim() || generateSlug();
+  } catch {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  let body: unknown;
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
+  }
+
+  const payload = body as Record<string, unknown>;
+  const title = String(payload.title ?? "").trim();
+  if (!title) {
+    return NextResponse.json({ error: "Title required" }, { status: 400 });
+  }
+
+  const status = (payload.status ?? "draft") as PostStatus;
+  const validStatuses: PostStatus[] = [
+    "draft",
+    "published",
+    "archived",
+    "private",
+    "unlinked",
+  ];
+  if (!validStatuses.includes(status)) {
+    return NextResponse.json({ error: "Invalid status" }, { status: 400 });
+  }
+
+  const slug = String(payload.slug ?? "").trim() || generateSlug();
+  const content =
+    typeof payload.content === "object" && payload.content !== null
+      ? (payload.content as Record<string, unknown>)
+      : {};
+
+  try {
     const post = await createPost({
       title,
-      content: body.content ?? {},
-      excerpt: body.excerpt ?? "",
+      content,
+      excerpt: String(payload.excerpt ?? ""),
       status,
       slug,
     });

@@ -22,7 +22,7 @@ function createBaseClient(url: string, key: string): GenericClient {
     try {
       // eslint-disable-next-line @typescript-eslint/no-require-imports
       const ws = require("ws") as typeof import("ws");
-      options.realtime = { transport: ws as unknown as WebSocket };
+      options.realtime = { transport: ws as any };
     } catch {
       /* realtime unused for REST-only usage */
     }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEditor, EditorContent } from "@tiptap/react";
+import { useEditor, EditorContent, NodeViewWrapper, ReactNodeViewRenderer } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Image from "@tiptap/extension-image";
 import Link from "@tiptap/extension-link";
@@ -11,11 +11,123 @@ import Underline from "@tiptap/extension-underline";
 import TextAlign from "@tiptap/extension-text-align";
 import HorizontalRule from "@tiptap/extension-horizontal-rule";
 import { common, createLowlight } from "lowlight";
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import imageCompression from "browser-image-compression";
 import { VideoBlock, ImageCompareBlock } from "@/lib/tiptap/extensions";
 
 const lowlight = createLowlight(common);
+
+function ResizableImageComponent({ node, updateAttributes, selected }: any) {
+  const imgRef = useRef<HTMLImageElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [resizing, setResizing] = useState(false);
+  const [width, setWidth] = useState(node.attrs.width || "100%");
+  const widthRef = useRef(node.attrs.width || "100%");
+
+  useEffect(() => {
+    setWidth(node.attrs.width || "100%");
+    widthRef.current = node.attrs.width || "100%";
+  }, [node.attrs.width]);
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setResizing(true);
+
+    const startX = e.clientX;
+    const startWidth = imgRef.current ? imgRef.current.clientWidth : 200;
+    const parentWidth = containerRef.current?.parentElement ? containerRef.current.parentElement.clientWidth : 500;
+
+    const handleMouseMove = (moveEvent: MouseEvent) => {
+      const deltaX = moveEvent.clientX - startX;
+      const newWidthPx = Math.max(50, startWidth + deltaX);
+      const newWidthPercent = Math.min(100, Math.round((newWidthPx / parentWidth) * 100));
+      const nextWidth = `${newWidthPercent}%`;
+      setWidth(nextWidth);
+      widthRef.current = nextWidth;
+    };
+
+    const handleMouseUp = () => {
+      setResizing(false);
+      document.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("mouseup", handleMouseUp);
+      updateAttributes({ width: widthRef.current });
+    };
+
+    document.addEventListener("mousemove", handleMouseMove);
+    document.addEventListener("mouseup", handleMouseUp);
+  };
+
+  const displayWidth = width.endsWith("%") ? `calc(${width} - 8px)` : width;
+
+  return (
+    <NodeViewWrapper
+      ref={containerRef}
+      className={`resizable-image-wrapper ${selected ? "is-selected" : ""}`}
+      style={{
+        display: "inline-block",
+        width: displayWidth,
+        position: "relative",
+        userSelect: "none",
+        margin: "4px",
+        verticalAlign: "top",
+      }}
+    >
+      <img
+        ref={imgRef}
+        src={node.attrs.src}
+        alt=""
+        style={{
+          width: "100%",
+          display: "block",
+          borderRadius: "4px",
+          outline: selected ? "2px solid #87bf4e" : "none",
+          transition: resizing ? "none" : "outline 0.15s ease",
+        }}
+      />
+      {selected && (
+        <div
+          onMouseDown={handleMouseDown}
+          style={{
+            position: "absolute",
+            bottom: "4px",
+            right: "4px",
+            width: "12px",
+            height: "12px",
+            background: "#87bf4e",
+            border: "2px solid white",
+            cursor: "nwse-resize",
+            borderRadius: "2px",
+            boxShadow: "0 1px 3px rgba(0,0,0,0.4)",
+            zIndex: 10,
+          }}
+        />
+      )}
+    </NodeViewWrapper>
+  );
+}
+
+const CustomImage = Image.extend({
+  addAttributes() {
+    return {
+      ...this.parent?.(),
+      width: {
+        default: "100%",
+        parseHTML: (element) => element.getAttribute("width") || element.style.width || "100%",
+        renderHTML: (attributes) => {
+          const w = attributes.width || "100%";
+          const displayWidth = w.endsWith("%") ? `calc(${w} - 8px)` : w;
+          return {
+            width: attributes.width,
+            style: `width: ${displayWidth}; max-width: 100%; height: auto; display: inline-block; vertical-align: top; margin: 4px;`,
+          };
+        },
+      },
+    };
+  },
+  addNodeView() {
+    return ReactNodeViewRenderer(ResizableImageComponent);
+  },
+});
 
 type Props = {
   content: Record<string, unknown>;
@@ -62,7 +174,7 @@ export function RichEditor({ content, onChange }: Props) {
       }),
       Underline,
       Link.configure({ openOnClick: false, autolink: true }),
-      Image.configure({ inline: false, allowBase64: false }),
+      CustomImage.configure({ inline: false, allowBase64: false }),
       VideoBlock,
       ImageCompareBlock,
       CodeBlockLowlight.configure({ lowlight }),
@@ -242,6 +354,16 @@ export function RichEditor({ content, onChange }: Props) {
         {tool("→", () => editor.chain().focus().setTextAlign("right").run(), editor.isActive({ textAlign: "right" }), "Align right")}
         {tool("Undo", () => editor.chain().focus().undo().run(), false, "Undo")}
         {tool("Redo", () => editor.chain().focus().redo().run(), false, "Redo")}
+        {editor.isActive("image") && (
+          <>
+            <span className="admin-toolbar-sep" />
+            <span style={{ fontSize: "11px", fontWeight: "bold", alignSelf: "center", color: "#666", marginRight: "4px" }}>Image Size:</span>
+            {tool("25%", () => editor.chain().focus().updateAttributes("image", { width: "25%" }).run(), editor.getAttributes("image").width === "25%", "Quarter Width")}
+            {tool("33%", () => editor.chain().focus().updateAttributes("image", { width: "33%" }).run(), editor.getAttributes("image").width === "33%", "Third Width")}
+            {tool("50%", () => editor.chain().focus().updateAttributes("image", { width: "50%" }).run(), editor.getAttributes("image").width === "50%", "Half Width")}
+            {tool("100%", () => editor.chain().focus().updateAttributes("image", { width: "100%" }).run(), !editor.getAttributes("image").width || editor.getAttributes("image").width === "100%", "Full Width")}
+          </>
+        )}
       </div>
       <EditorContent editor={editor} />
     </div>

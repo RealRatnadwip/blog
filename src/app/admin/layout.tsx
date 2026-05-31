@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { AutoLogout } from "@/components/admin/AutoLogout";
 
 export const metadata: Metadata = {
   title: "Blog Admin",
@@ -10,5 +11,10 @@ export default function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return <div className="admin-root">{children}</div>;
+  return (
+    <div className="admin-root">
+      <AutoLogout />
+      {children}
+    </div>
+  );
 }

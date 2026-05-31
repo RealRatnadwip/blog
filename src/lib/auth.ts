@@ -13,8 +13,8 @@ export async function verifyAdminCredentials(
   username: string,
   password: string,
 ): Promise<boolean> {
-  const envUser = process.env.ADMIN_USERNAME;
-  const envPass = process.env.ADMIN_PASSWORD;
+  const envUser = process.env.ADMIN_USERNAME || process.env.USERNAME;
+  const envPass = process.env.ADMIN_PASSWORD || process.env.PASSWORD;
   if (!envUser || !envPass) return false;
   return username === envUser && password === envPass;
 }
