@@ -113,7 +113,7 @@ export function WindowFrame({ win, children }: Props) {
 
   const active = activeId === win.id;
   const style = win.maximized
-    ? { left: 0, top: 0, width: "100%", height: "calc(100% - 40px)" }
+    ? { left: 0, top: 0, width: "100%", height: "100%" }
     : { left: win.x, top: win.y, width: win.w, height: win.h };
 
   return (

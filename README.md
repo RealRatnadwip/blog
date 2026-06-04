@@ -30,7 +30,6 @@ cp .env.example .env.local
 | `AUTH_SECRET` | Session signing (`openssl rand -base64 32`) |
 | `NEXT_PUBLIC_SUPABASE_*` | Client + public reads |
 | `SUPABASE_SERVICE_ROLE_KEY` | Server uploads & admin API |
-| `NEXT_PUBLIC_SITE_URL` | Canonical URL (e.g. `https://blog.example.com`) |
 
 ### 3. Local dev
 

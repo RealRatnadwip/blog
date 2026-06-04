@@ -108,21 +108,21 @@ function neofetchAscii(
     █ Desktop █
    ███████████`;
   return `${art}
-       ratna@blog-os
-       ─────────────
-       OS: Linux Mint 22 (blog edition)
-       Host: blog.example.com
-       Kernel: 6.6.99-cinnamon
+       ratna@ratnadwip.dev
+       ───────────────────
+       OS: Linux Mint 22 (Wilma) x86_64
+       Host: Oracle Red Bull Racing Edition 🏎️
+       Kernel: 6.6.2am-sleep-deprived
        Uptime: ${sessionMins} mins (session)
-       Packages: 1847 (dpkg)
-       Shell: bash 5.2.21
+       Shell: bash (synthwave-fueled)
        Resolution: ${resolution}
-       DE: Cinnamon
-       WM: Muffin
-       Theme: Mint-Y-Dark [GTK2/3]
-       Terminal: gnome-terminal
-       CPU: AMD Ryzen (simulated)
-       Memory: 8192MiB / 16384MiB`.trim();
+       DE: Cinnamon (custom glassmorphism)
+       Theme: Mint-Y-Glass [Cinnamon]
+       CPU: CS Student Brain (Overclocked @ 2AM)
+       GPU: Creative Engine (Premiere + Photoshop + Blender)
+       Memory: 14 cups of Coffee / 16GB
+       F1 Favorite: Oracle Red Bull Racing 🐂🏆
+       Alignment: Chaotic Productive`.trim();
 }
 
 export function runCommand(
@@ -167,7 +167,7 @@ export function runCommand(
       }
       lines.push({
         type: "out",
-        text: `GNU bash-style help (simulated)\n\n${Object.keys(HELP_TOPICS).join(", ")}\n\nUse: help TOPIC   e.g. help ls`,
+        text: `GNU bash-style help (simulated)\n\n${Object.keys(HELP_TOPICS).join(", ")}, dtmf, f1, synth\n\nUse: help TOPIC   e.g. help ls`,
       });
       break;
     }
@@ -202,10 +202,10 @@ export function runCommand(
       if (hasFlag(args, "-a")) {
         lines.push({
           type: "out",
-          text: "Linux blog-desktop 6.6.99-cinnamon #1 SMP x86_64 GNU/Linux",
+          text: "Linux ratna-desktop 6.6.2am-sleep-deprived #1 SMP x86_64 GNU/Linux",
         });
       } else if (hasFlag(args, "-r")) {
-        lines.push({ type: "out", text: "6.6.99-cinnamon" });
+        lines.push({ type: "out", text: "6.6.2am-sleep-deprived" });
       } else if (hasFlag(args, "-m")) {
         lines.push({ type: "out", text: "x86_64" });
       } else {
@@ -280,7 +280,9 @@ export function runCommand(
           lines.push({ type: "err", text: `cat: ${f}: Is a directory` });
           continue;
         }
-        if (node.name === "notes.txt") {
+        if (node.content !== undefined) {
+          lines.push({ type: "out", text: node.content });
+        } else if (node.name === "notes.txt") {
           lines.push({
             type: "out",
             text: "Blog posts are listed in the Notes application.\nOpen Menu → Notes or double-click the desktop icon.",
@@ -288,7 +290,7 @@ export function runCommand(
         } else if (node.name === ".bashrc") {
           lines.push({
             type: "out",
-            text: "# ~/.bashrc\nexport PS1='\\u@blog:\\w\\$ '\nalias ll='ls -la'\nalias la='ls -A'",
+            text: "# ~/.bashrc\nexport PS1='\\u@blog:\\w\\$ '\nalias ll='ls -la'\nalias la='ls -A'\nplay-chord",
           });
         } else if (node.mediaUrl) {
           lines.push({
@@ -299,6 +301,31 @@ export function runCommand(
           lines.push({ type: "out", text: "" });
         }
       }
+      break;
+    }
+    case "dtmf":
+    case "rdtmf": {
+      lines.push({
+        type: "out",
+        text: "rDTMF Keypad Decoder v1.0.2 Initiated.\nPress keys to play dual-tone multi-frequency signals.\nDecoding keypad tones in real-time...\n__DTMF__",
+      });
+      break;
+    }
+    case "f1":
+    case "race":
+    case "telemetry": {
+      lines.push({
+        type: "out",
+        text: `🏎️ Oracle Red Bull Racing Telemetry - Monaco GP Sector 3\n────────────────────────────────────────────────────────\n[Car] Red Bull RB20 (Honda RBPTH002)\n[Driver] RealRatnadwip\n[Telemetry] Speed: 324 km/h | RPM: 12,100 | DRS: Active | Gear: 8\n[Tires] Softs (C5 - 3 laps old)\n[Radio] "Okay Max, Checo is behind. Box for softs, let's go for fastest lap."\n[Status] P1 - Gap to P2: +12.4s\n[Team Alignment] Oracle Red Bull Racing Fan 🐂🏆`,
+      });
+      break;
+    }
+    case "synth":
+    case "audio": {
+      lines.push({
+        type: "out",
+        text: "Ableton Live audio engine initialized.\nTry typing `dtmf` for DTMF wave synthesis,\nor adjust system volume in the panel Quick Settings.",
+      });
       break;
     }
     case "sudo":

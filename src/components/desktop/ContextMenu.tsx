@@ -50,7 +50,12 @@ export function ContextMenu() {
     <div
       ref={menuRef}
       className="context-menu"
-      style={{ left, top }}
+      style={{
+        left,
+        top,
+        backdropFilter: "blur(20px) saturate(180%)",
+        WebkitBackdropFilter: "blur(20px) saturate(180%)",
+      }}
       role="menu"
       onContextMenu={(e) => e.preventDefault()}
     >

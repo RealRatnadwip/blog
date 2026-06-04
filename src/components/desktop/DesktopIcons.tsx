@@ -31,11 +31,14 @@ export function DesktopIcons() {
     if ((e.target as HTMLElement).closest(".mint-desktop-icon")) return;
     e.preventDefault();
     e.stopPropagation();
-    // Left-click on empty desktop toggles menu; right-click always opens
-    if (e.type === "click" && useDesktopStore.getState().contextMenu) {
-      closeContextMenu();
+    
+    if (e.type === "click") {
+      if (useDesktopStore.getState().contextMenu) {
+        closeContextMenu();
+      }
       return;
     }
+    
     openDesktopMenu(e.clientX, e.clientY);
   };
 
