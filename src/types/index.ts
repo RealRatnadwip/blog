@@ -35,6 +35,7 @@ export type TextScale = "small" | "medium" | "large";
 export interface DesktopSettings {
   theme: DesktopTheme;
   textScale: TextScale;
+  soundEnabled?: boolean;
 }
 
 export interface FsNode {
@@ -44,4 +45,6 @@ export interface FsNode {
   children?: FsNode[];
   mediaUrl?: string;
   mimeType?: string;
+  content?: string;
+  slug?: string;
 }

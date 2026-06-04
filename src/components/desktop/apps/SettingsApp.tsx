@@ -4,11 +4,11 @@ import { useDesktopStore } from "@/store/desktop";
 import type { DesktopTheme, TextScale } from "@/types";
 
 export function SettingsApp() {
-  const { settings, setTheme, setTextScale } = useDesktopStore();
+  const { settings, setTheme, setTextScale, setSoundEnabled } = useDesktopStore();
 
   return (
     <div className="settings-app">
-      <h3>Appearance</h3>
+      <h3>Appearance & Sounds</h3>
       <label className="settings-row">
         Theme
         <select
@@ -28,6 +28,16 @@ export function SettingsApp() {
           <option value="small">Small</option>
           <option value="medium">Medium</option>
           <option value="large">Large</option>
+        </select>
+      </label>
+      <label className="settings-row">
+        System Sounds
+        <select
+          value={settings.soundEnabled !== false ? "on" : "off"}
+          onChange={(e) => setSoundEnabled(e.target.value === "on")}
+        >
+          <option value="on">Enabled</option>
+          <option value="off">Disabled</option>
         </select>
       </label>
       <p className="settings-hint">

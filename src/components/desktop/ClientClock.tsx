@@ -4,15 +4,22 @@ import { useEffect, useState } from "react";
 
 export function ClientClock() {
   const [time, setTime] = useState("");
+  const [date, setDate] = useState("");
 
   useEffect(() => {
     const tick = () => {
+      const now = new Date();
       setTime(
-        new Date().toLocaleTimeString(undefined, {
+        now.toLocaleTimeString(undefined, {
           hour: "2-digit",
           minute: "2-digit",
-          second: "2-digit",
           hour12: false,
+        }),
+      );
+      setDate(
+        now.toLocaleDateString(undefined, {
+          day: "numeric",
+          month: "short",
         }),
       );
     };
@@ -21,5 +28,11 @@ export function ClientClock() {
     return () => clearInterval(id);
   }, []);
 
-  return <span className="mint-clock">{time || "—:—"}</span>;
+  return (
+    <div className="mint-clock-widget">
+      <span className="mint-clock-time">{time || "—:—"}</span>
+      <span className="mint-clock-date">{date || "— —"}</span>
+    </div>
+  );
 }
+

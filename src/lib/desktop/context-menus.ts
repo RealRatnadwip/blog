@@ -1,5 +1,6 @@
 import type { ContextMenuItem } from "@/store/desktop";
 import type { DesktopWindow, WindowId } from "@/store/desktop";
+import type { FsNode } from "@/types";
 
 type Actions = {
   openApp: (app: WindowId, title: string, payload?: Record<string, unknown>) => void;
@@ -110,6 +111,93 @@ export function startButtonContextMenu(actions: Actions): ContextMenuItem[] {
       id: "settings",
       label: "Settings",
       action: () => actions.openApp("settings", "Settings"),
+    },
+  ];
+}
+
+export function filesBgContextMenu(
+  path: string,
+  actions: {
+    createFile: (parent: string, name: string) => void;
+    createDirectory: (parent: string, name: string) => void;
+    openTerminal: (path: string) => void;
+    showProperties: (node: FsNode) => void;
+    dirNode: FsNode;
+  }
+): ContextMenuItem[] {
+  return [
+    {
+      id: "new-file",
+      label: "Create New Document",
+      action: () => {
+        const name = prompt("Enter file name (e.g. notes.txt):", "Untitled.txt");
+        if (name) actions.createFile(path, name);
+      },
+    },
+    {
+      id: "new-folder",
+      label: "Create New Folder",
+      action: () => {
+        const name = prompt("Enter folder name:", "Untitled Folder");
+        if (name) actions.createDirectory(path, name);
+      },
+    },
+    { id: "sep1", separator: true },
+    {
+      id: "open-terminal-here",
+      label: "Open Terminal Here",
+      action: () => actions.openTerminal(path),
+    },
+    { id: "sep2", separator: true },
+    {
+      id: "properties",
+      label: "Properties",
+      action: () => actions.showProperties(actions.dirNode),
+    },
+  ];
+}
+
+export function filesItemContextMenu(
+  item: FsNode,
+  actions: {
+    open: (node: FsNode) => void;
+    rename: (path: string) => void;
+    deleteNode: (path: string) => void;
+    copyPath: (path: string) => void;
+    showProperties: (node: FsNode) => void;
+  }
+): ContextMenuItem[] {
+  return [
+    {
+      id: "open",
+      label: item.type === "directory" ? "Open Folder" : "Open",
+      action: () => actions.open(item),
+    },
+    { id: "sep1", separator: true },
+    {
+      id: "rename",
+      label: "Rename...",
+      action: () => {
+        const newName = prompt(`Rename "${item.name}" to:`, item.name);
+        if (newName && newName !== item.name) actions.rename(newName);
+      },
+    },
+    {
+      id: "copy-path",
+      label: "Copy Path",
+      action: () => actions.copyPath(item.path),
+    },
+    {
+      id: "delete",
+      label: "Delete",
+      danger: true,
+      action: () => actions.deleteNode(item.path),
+    },
+    { id: "sep2", separator: true },
+    {
+      id: "properties",
+      label: "Properties",
+      action: () => actions.showProperties(item),
     },
   ];
 }
